@@ -154,9 +154,8 @@
       }
 
       async function loadCorgis() {
-        const corgis = await fetch(
-          '/.netlify/functions/load-corgis'
-        ).then((res) => res.json());
+        const corgis = await fetch('/.netlify/functions/load-corgis')
+        .then((res) => res.json());
 
         render(
           html` ${corgis.map((corgi) => html` <${Corgi} corgi=${corgi} /> `)}`,
