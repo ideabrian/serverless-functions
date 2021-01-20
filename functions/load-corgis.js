@@ -2,15 +2,16 @@ const fetch = require('node-fetch');
 const { hasuraRequest } = require('./util/hasura');
 
 exports.handler = async () => {
-  const corgis = await fetch('https://no-cors-api.netlify.app/api/corgis/')
-  .then((res) => res.json());
+  const corgis = await fetch(
+    'https://no-cors-api.netlify.app/api/corgis/'
+    ).then((res) => res.json());
   
   const unsplashPromise = fetch(
     'https://api.unsplash.com/collections/48405776/photos',
     {
       headers: {
         Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`
-      }
+      },
     }
   ).then((res) => res.json());
 
@@ -25,26 +26,23 @@ exports.handler = async () => {
       }
     }`,
     variables: {
-      corgis: corgis.map( ({ id }) => ({ id, count: 10 })),
+      corgis: corgis.map( ({ id }) => ({ id, count: 0 })),
     }
-  })
+  });
 
-  const [unsplashData, hasuraData] = await Promise.all([unsplashPromise, hasuraPromise])
-  console.log(hasuraData.boops.returning)
+  const [unsplashData, hasuraData] = await Promise.all([unsplashPromise, hasuraPromise]);
+  
+  
   const completeData = corgis.map((corgi) => {
-    // console.log({"corgiID": corgi.id})
-    // console.log(hasuraData.boops.returning)
-    const photo = unsplashData.find((p) => corgi.id === p.id)
-    const boops = hasuraData.boops.returning.find( (b) => {
-      return b.id === photo.id
-    });
-    // console.log({"boops": boops})
+    const photo = unsplashData.find((p) => corgi.id === p.id);
+    const boops = hasuraData.boops.returning.find( (b) =>  b.id === corgi.id );
+    
     return {
       ...corgi,
       alt: photo.alt_description,
       credit:photo.user.name,
       url: `${photo.urls.raw}&auto=format&fit=crop&w=300&h=300&q=80&crop=entropy`,
-      // boops: boops.count,
+      boops: boops.count,
     }
   })
   return {
